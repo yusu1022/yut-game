@@ -333,7 +333,6 @@ io.on("connection", (socket) => {
   })
 
   
-
   socket.on("throwYut", (roomId) => {
     const room = rooms[roomId]
     if (!room) return
@@ -344,10 +343,10 @@ io.on("connection", (socket) => {
     if (player.socketId !== socket.id) return
     if (player.pieces.every(p => p.finished)) return
 
+    room.canThrow = false  // 🔒 즉시 잠금
+
     const result = getWeightedRandom()
     room.moveStack.push(result)
-
-    io.to(roomId).emit("yutThrown", { result })
 
     const isExtra = (result === 4 || result === 5)
 
@@ -355,9 +354,14 @@ io.on("connection", (socket) => {
       room.phase = "moving"
     }
 
-    room.canThrow = true
-
+    io.to(roomId).emit("yutThrown", { result })
     io.to(roomId).emit("roomUpdate", room)
+
+    // 🔥 영상 길이만큼 서버가 잠금 유지
+    setTimeout(() => {
+      room.canThrow = true
+      io.to(roomId).emit("roomUpdate", room)
+    }, 2000) // ← 영상 길이에 맞게 (예: 2초)
   })
   
 
