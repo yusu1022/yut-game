@@ -46,6 +46,25 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (!room) return
+    if (!room.moveStack) return
+    if (room.moveStack.length === 0) return
+
+    const lastMove = room.moveStack[room.moveStack.length - 1]
+
+    // 🔥 애니메이션 중이면 중복 실행 방지
+    if (isYutAnimating) return
+
+    const videoPath = getVideoByResult(lastMove)
+
+    setVideoReady(false)
+    setCurrentYutVideo(videoPath)
+    setIsYutAnimating(true)
+
+  }, [room])
+
+
+  useEffect(() => {
 
     const videoList = [
       "/videos/backdo.mp4",
@@ -64,22 +83,6 @@ function App() {
 
   }, [])
 
-  useEffect(() => {
-    socket.on("yutThrown", ({ result }) => {
-
-      const videoPath = getVideoByResult(result)
-
-      setVideoReady(false) 
-
-      setCurrentYutVideo(videoPath)
-      setIsYutAnimating(true)
-
-    })
-
-    return () => {
-      socket.off("yutThrown")
-    }
-  }, [])
 
   const joinRoom = () => {
     if (!nickname || !roomId) return
@@ -379,7 +382,6 @@ function App() {
                 setIsYutAnimating(false)
                 setCurrentYutVideo(null)
                 setVideoReady(false)
-                socket.emit("readyForNextThrow", roomId)
               }}
               style={{
                 position: "absolute",
