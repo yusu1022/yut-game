@@ -344,9 +344,6 @@ io.on("connection", (socket) => {
     if (player.socketId !== socket.id) return
     if (player.pieces.every(p => p.finished)) return
 
-    // 🔥 이번 던지기 이후 추가 입력 차단
-    room.canThrow = false
-
     const result = getWeightedRandom()
     room.moveStack.push(result)
 
@@ -358,21 +355,12 @@ io.on("connection", (socket) => {
       room.phase = "moving"
     }
 
-    io.to(roomId).emit("roomUpdate", room)
-  })
-  
-  socket.on("readyForNextThrow", (roomId) => {
-    const room = rooms[roomId]
-    if (!room) return
-    if (room.phase !== "throwing") return
-
-    const player = room.players[room.turnIndex]
-    if (player.socketId !== socket.id) return   // 🔥 추가
-
     room.canThrow = true
 
     io.to(roomId).emit("roomUpdate", room)
   })
+  
+
 
 
   socket.on("skipIslandTurn", (roomId) => {

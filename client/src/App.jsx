@@ -39,30 +39,29 @@ function App() {
   const [currentYutVideo, setCurrentYutVideo] = useState(null)
   const [videoReady, setVideoReady] = useState(false)
 
+
+  useEffect(() => {
+    socket.on("yutThrown", ({ result }) => {
+
+      const videoPath = getVideoByResult(result)
+
+      setVideoReady(false) 
+
+      setCurrentYutVideo(videoPath)
+      setIsYutAnimating(true)
+
+    })
+
+    return () => {
+      socket.off("yutThrown")
+    }
+  }, [])
+
   useEffect(() => {
     socket.on("roomUpdate", (roomData) => {
       setRoom(roomData)
     })
   }, [])
-
-  useEffect(() => {
-    if (!room) return
-    if (!room.moveStack) return
-    if (room.moveStack.length === 0) return
-
-    const lastMove = room.moveStack[room.moveStack.length - 1]
-
-    // 🔥 애니메이션 중이면 중복 실행 방지
-    if (isYutAnimating) return
-
-    const videoPath = getVideoByResult(lastMove)
-
-    setVideoReady(false)
-    setCurrentYutVideo(videoPath)
-    setIsYutAnimating(true)
-
-  }, [room])
-
 
   useEffect(() => {
 
