@@ -218,6 +218,7 @@ function App() {
           {isMyTurn &&
             room?.phase === "throwing" &&
             room?.canThrow &&
+            !isYutAnimating &&
             !room.players[room.turnIndex].pieces.every(p => p.finished) &&
             !shouldSkip && (
               <button
